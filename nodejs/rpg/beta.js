@@ -23,13 +23,17 @@ function prt(a){
           console.log(a);
 }
 
+function prtx(a){
+	console.log('***system: '+a+' ***');
+}
+
 function showall(a){
         for(x in a){
 		if(a[x] == 'player')
 			prt(form+player.name+form);
 		else if(a[x] == 'bag'){
 			prt(form+a[x]+form);
-			prt(' \t'+bag.__+'/10');
+			prt(' \t'+bag.__+'/'+limit);
 		}
 		else if(a[x] == 'shop'){
 			prt(form+a[x]+form);
@@ -49,8 +53,8 @@ function showall(a){
 //玩家
 var player = {
 	tag : 'player',
-        name : 'hero',
-        carrer : 'ghost',
+        name : 'Safeguard.M',
+        carrer : 'coder',
         hp : 100,
         mp : 100,
         money : 0,	
@@ -74,36 +78,59 @@ var shop = {
 	shoes:3,
 	cloth:4,
 	pants:4,
-	buy:function(){
-;	},
-	sell: function(){
-;	},
+	buy:function(str){
+		if((player.money - shop[str]) >= 0){
+			player.money -= shop[str];
+			bag[str] += 1 ;
+			bag.__ += 1;
+			prtx('purchase success.');
+		}
+		else{
+			prtx('U dont hava enough money. Your $:'+player.money)
+		}
+	},
+
+	//sell: function(){;},
+	
 	work: function(){
 		player.hp -=10;
 		player.mp -=10;
-		player.money +=10;	
-	prt('work')}
+		player.money +=5;
+		prtx(' After 996 , Your $: '+player.money);
+		}
 }
 
 
 //------------------------全局变量--------------------------------
-var form = '-------------'
+
+var limit = 100 ;//[可选项]物品栏上限
+
+var ipt;//用于接收输入
+
+var form = '-------------';
+
+var shoplist = `b) buy		w) work`;
 
 //菜单 '-' x 13
 const menu =
-` ----------choose menu-----------
- |	1) status	2) bag  |
- |	3) shop		4) game |	
- |	q) exit		        |
- |				|
- --------------------------------`;
+` ----------choose menu------------
+ |	1) status	2) bag   |
+ |	3) shop		4) game  |	
+ |	5) menu 	0) exit  |
+ ---------------------------------`;
 
 //-------------------------main-----------------------------------
 
+
 prt(menu);
 
-
 rl.on('line',function(line) {
+	
+	if(player.hp <= 0){
+		prt('Your health is:'+player.hp);
+		prt('ICU welcom');
+		rl.close();
+	}
 	
 	switch(line){
 		case '1':  {
@@ -116,23 +143,41 @@ rl.on('line',function(line) {
 		}
 		case '3':  {
 			showall(shop);
+			prt(shoplist);
 			break;
 		}
 		case '4':  {
-			showall(game);
+			ceasa();
 			break;
 		}
-		case 'q':  {
+		case '0':  {
 			rl.close();
+			break;
 		}
-		default:   {
+		case '5':   {
 			prt(menu);
-			//prt('err input');
+			break;
 		}
+		case 'b':{
+			prtx('input the ITEM NAME to Buy');
+			rl.once('buySth',function(){
+				shop.buy(ipt);
+			});
+			break;
+		}
+		case 'w':{
+			shop.work();
+			break;
+		}
+		default :{
+			ipt = line;
+			rl.emit('buySth');
+			break;
+		}
+	
 	}
-//	prt(menu);
 });
 
 rl.on('close',function(){
-	prt('finish');
+	prt('GameOver');
 	});
